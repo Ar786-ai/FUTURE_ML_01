@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sales Forecasting Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📈 Sales Forecasting Dashboard</h1>
+            <p>Upload your sales data and get AI-powered forecasts with beautiful visualizations</p>
+        </div>
+
+        <div class="upload-section">
+            <form id="upload-form" method="POST" enctype="multipart/form-data">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">📁</div>
+                    <div class="upload-text">Drop your CSV file here or click to browse</div>
+                    <div class="upload-subtext">Supports CSV files up to 10MB</div>
+                    <input type="file" id="file-input" name="file" accept=".csv" required>
+                </div>
+                <button type="submit" class="btn" id="submit-btn">Generate Forecast</button>
+            </form>
+
+            <div class="loading" id="loading">
+                <div class="loading-spinner"></div>
+                <p>Processing your data and generating forecasts...</p>
+            </div>
+
+            {% if error %}
+            <div class="error" style="display: block;">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <div class="sample-format">
+                <div class="sample-title">Expected CSV Format:</div>
+                <div class="sample-code">
+date,sales<br>
+2023-01-01,100<br>
+2023-01-02,120<br>
+2023-01-03,110<br>
+...
+                </div>
+            </div>
+        </div>
+
+        {% if forecast_data and plots %}
+        <div class="results-section" id="results" style="display: block;">
+            <div class="results-grid">
+                <div class="chart-container">
+                    <div class="chart-title">📊 Forecast Overview</div>
+                    <img src="data:image/png;base64,{{ plots.forecast_plot }}" class="chart-img" alt="Forecast Chart">
+                </div>
+                
+                <div class="chart-container">
+                    <div class="chart-title">🔍 Trend Components</div>
+                    <img src="data:image/png;base64,{{ plots.components_plot }}" class="chart-img" alt="Components Chart">
+                </div>
+                
+                <div class="forecast-table-container">
+                    <div class="chart-title">📅 30-Day Forecast Data</div>
+                    <table class="forecast-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Predicted Sales</th>
+                                <th>Lower Bound</th>
+                                <th>Upper Bound</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for row in forecast_data %}
+                            <tr>
+                                <td>{{ row.ds }}</td>
+                                <td>{{ "%.2f"|format(row.yhat) }}</td>
+                                <td>{{ "%.2f"|format(row.yhat_lower) }}</td>
+                                <td>{{ "%.2f"|format(row.yhat_upper) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+</body>
+</html>
